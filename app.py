@@ -24,8 +24,7 @@ login_manager.login_view = "login"
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
+    
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), nullable=False, unique=True)
@@ -34,16 +33,11 @@ class User(db.Model, UserMixin):
     mobile = db.Column(db.String(20), nullable=False, unique=True)
 
 class RegsiterForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(
-        min=4, max=20)], render_kw={"placeholder":"Username"})
-    email = StringField(validators=[InputRequired(), Length(
-        min=4, max=40)], render_kw={"placeholder":"Email"})
-    mobile = StringField(validators=[InputRequired(), Length(
-        min=4, max=40)], render_kw={"placeholder":"Mobile no."})
-    password = PasswordField(validators=[InputRequired(), Length(
-        min=4, max=20)], render_kw={"placeholder":"Password"})
+    username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder":"Username"})
+    email = StringField(validators=[InputRequired(), Length(min=4, max=40)], render_kw={"placeholder":"Email"})
+    mobile = StringField(validators=[InputRequired(), Length(min=4, max=40)], render_kw={"placeholder":"Mobile no."})
+    password = PasswordField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder":"Password"})
     password2 = PasswordField(validators=[InputRequired(), EqualTo('password')], render_kw={"placeholder":"Confirm Password"})
-    
     submit = SubmitField("Register")
 
     def validate_user(self, username, email, mobile):
@@ -59,14 +53,11 @@ class RegsiterForm(FlaskForm):
         if existing_user_mobile:
             raise ValidationError('User already exists. Please choose a different username.')
         
-
 class LoginForm(FlaskForm):
     email = StringField(validators=[InputRequired(), Length(
         min=4, max=20)], render_kw={"placeholder":"Email"})
     password = PasswordField(validators=[InputRequired(), Length(
         min=4, max=20)], render_kw={"placeholder":"Password"})
-
-
     submit = SubmitField("Login")
 
 @app.route('/')
