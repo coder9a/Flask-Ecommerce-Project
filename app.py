@@ -179,5 +179,13 @@ def signup():
     return render_template('register.html', form=form)
 
 
+@app.route('/order')
+def order():
+    return render_template('order.html')
+
+@app.route('/orderStatus')
+def orderStatus():
+    return render_template('orderPlaced.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
