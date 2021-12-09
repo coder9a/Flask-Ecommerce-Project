@@ -9,6 +9,7 @@ from wtforms.validators import InputRequired, Length, ValidationError, EqualTo
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bcrypt import Bcrypt
 
+
 SECRET_KEY = os.urandom(32)
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
