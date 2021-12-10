@@ -1,5 +1,5 @@
 import os
-from flask import Flask, url_for, redirect, request
+from flask import Flask, url_for, redirect, request, flash
 from flask.templating import render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_manager, login_user, login_required, LoginManager, current_user, logout_user
@@ -151,6 +151,12 @@ def login():
             if bcrypt.check_password_hash(email.password, form.password.data):
                 login_user(email)
                 return redirect(url_for('dashboard'))
+            else:
+                flash(f'Your credentials did not match. Please try again')
+                return redirect(url_for('login'))
+        else:
+            flash(f'Your credentials did not match. Please try again')
+            return redirect(url_for('login'))
     return render_template('login.html', form=form)
 
 
@@ -175,7 +181,8 @@ def signup():
                         email=form.email.data, mobile=form.mobile.data)
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('login'))
+        flash(f"You have signed up successfully. Please go to login page.")
+        return redirect(url_for('signup'))
     return render_template('register.html', form=form)
 
 
