@@ -166,24 +166,23 @@ def login():
             loggedInAs = 'admin'
             return redirect('/admin')
         else:
-            flash(f'Your credentials did not match. Please try again')
+            flash(f'Your credentials did not match. Please try again', 'danger')
             return redirect('/login')
 
     # For normal user
     else:
         if form.validate_on_submit():
-            username = User.query.filter_by(
-                username=form.username.data).first()
+            username = User.query.filter_by(username=form.username.data).first()
             if username:
                 if bcrypt.check_password_hash(username.password, form.password.data):
                     loggedInAs = username
                     login_user(username)
                     return redirect('/')
                 else:
-                    flash(f'Your credentials did not match. Please try again')
+                    flash(f'Your credentials did not match. Please try again', 'danger')
                     return redirect(url_for('login'))
             else:
-                flash(f'Your credentials did not match. Please try again')
+                flash(f'Your credentials did not match. Please try again', 'danger')
                 return redirect(url_for('login'))
         return render_template('login.html', form=form)
 
@@ -204,13 +203,17 @@ def logout():
 def signup():
     form = RegsiterForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data, 12)
-        new_user = User(username=form.username.data, password=hashed_password,
-                        email=form.email.data, mobile=form.mobile.data)
-        db.session.add(new_user)
-        db.session.commit()
-        flash(f"You have signed up successfully. Redirecting you to login page.")
-        return redirect(url_for('login'))
+        if (form.username.data).lower() == 'admin':
+            flash(f'Username not allowed. Please any other username.', 'danger')
+            return redirect(url_for('signup'))
+        else:
+            hashed_password = bcrypt.generate_password_hash(form.password.data, 12)
+            new_user = User(username=form.username.data, password=hashed_password,
+                            email=form.email.data, mobile=form.mobile.data)
+            db.session.add(new_user)
+            db.session.commit()
+            flash(f'You have signed up successfully. Please login now.', 'success')
+            return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
 
