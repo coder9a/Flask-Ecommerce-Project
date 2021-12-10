@@ -104,33 +104,27 @@ class LoginForm(FlaskForm):
 
 
 @app.route('/admin', methods=['GET', 'POST'])
-@login_required
 def adminHome():
-    form = LoginForm()
-    if form.username.data == 'admin':
-        # --------------> For admin to add new product
-        if request.method == 'POST':
-            newItem = ProductsInfo(
-            name=request.form['productName'],
-            description=request.form['productDescription'],
-            price=request.form['productPrice'],
-            link=request.form['productLink'],
-            thumbnailLink=request.form['thumbnailLink']
-            )
-            try:
-                db.session.add(newItem)
-                db.session.commit()
-                return redirect('/admin')
-            except:
-                return "There was an issue pushing to database"
+    # --------------> For admin to add new product
+    if request.method == 'POST':
+        newItem = ProductsInfo(
+        name=request.form['productName'],
+        description=request.form['productDescription'],
+        price=request.form['productPrice'],
+        link=request.form['productLink'],
+        thumbnailLink=request.form['thumbnailLink']
+        )
+        try:
+            db.session.add(newItem)
+            db.session.commit()
+            return redirect('/admin')
+        except:
+            return "There was an issue pushing to database"
 
     # --------------------> For admin to display all the stored products
-        else:
-            products = ProductsInfo.query.order_by(ProductsInfo.name).all()
-            return render_template('Admin/adminPanel.html', products=products)
     else:
-        flash(f'You are not an admin user', 'danger')
-        return redirect('/login')
+        products = ProductsInfo.query.order_by(ProductsInfo.name).all()
+        return render_template('Admin/adminPanel.html', products=products)
 
 
 # -----------------------> For admin to delete a product
