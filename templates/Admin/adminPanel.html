@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block body %}
-<!-- Navbar -->
 
 <h1 onclick="takeHome();">Hey! Admin</h1>
 <div id="buttons">
@@ -29,8 +28,8 @@
         <label for="productDescription">Product Description: </label>
         <input type="text" name="productDescription" id="productDescription" /><br /><br />
 
-        <!-- <label for="myfile">Select a Thumbnail:</label>
-        <input type="file" id="myfile" name="myfile" /><br /><br /> -->
+        <label for="myfile">Select a Thumbnail:</label>
+        <input type="file" id="myfile" name="myfile" /><br /><br />
 
         <label for="myfile">Insert Thumbnail Link:</label>
         <input type="text" id="thumbnailLink" name="thumbnailLink" /><br /><br />
@@ -43,6 +42,13 @@
 
         <button class="btn btn-primary">Add to database</button>
     </form>
+
+    <!-- <form method="POST" action="">
+        <div class="form-group my-2">{{ form.hidden_tag() }}</div>
+        <div class="form-group my-2">{{ form.name }}</div>
+        <div class="form-group my-2">{{ form.submit }}</div>
+      </form> -->
+
 </div>
 
 
@@ -69,8 +75,6 @@
         </table>
 </div>
 
-
-<!-- Footer -->
 <script>
     function takeHome() {
         document.getElementById("buttons").style.display = 'block';
