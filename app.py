@@ -1,5 +1,5 @@
 import os
-from flask import Flask, url_for, redirect, request, flash
+from flask import Flask, url_for, redirect, request, flash, session
 from flask.templating import render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_manager, login_user, login_required, LoginManager, current_user, logout_user
@@ -11,7 +11,6 @@ from flask_bcrypt import Bcrypt
 from datetime import datetime
 import base64
 
-loggedInAs = None
 SECRET_KEY = os.urandom(32)
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -105,34 +104,33 @@ class LoginForm(FlaskForm):
 
 
 @app.route('/admin', methods=['GET', 'POST'])
+@login_required
 def adminHome():
-
-    # --------------> For admin to add new product
-    if request.method == 'POST':
-
-        # thumbnail = request.files['myfile']
-        # data = thumbnail.read()
-        # render_file = render_picture(data)
-
-        newItem = ProductsInfo(
+    form = LoginForm()
+    if form.username.data == 'admin':
+        # --------------> For admin to add new product
+        if request.method == 'POST':
+            newItem = ProductsInfo(
             name=request.form['productName'],
             description=request.form['productDescription'],
             price=request.form['productPrice'],
             link=request.form['productLink'],
             thumbnailLink=request.form['thumbnailLink']
-            # thumbnail = render_file
-        )
-        try:
-            db.session.add(newItem)
-            db.session.commit()
-            return redirect('/admin')
-        except:
-            return "There was an issue pushing to database"
+            )
+            try:
+                db.session.add(newItem)
+                db.session.commit()
+                return redirect('/admin')
+            except:
+                return "There was an issue pushing to database"
 
     # --------------------> For admin to display all the stored products
+        else:
+            products = ProductsInfo.query.order_by(ProductsInfo.name).all()
+            return render_template('Admin/adminPanel.html', products=products)
     else:
-        products = ProductsInfo.query.order_by(ProductsInfo.name).all()
-        return render_template('Admin/adminPanel.html', products=products)
+        flash(f'You are not an admin user', 'danger')
+        return redirect('/login')
 
 
 # -----------------------> For admin to delete a product
@@ -163,7 +161,8 @@ def login():
     # For admin
     if form.username.data and form.username.data == 'admin':
         if form.password.data == 'admin':
-            loggedInAs = 'admin'
+            session['username'] = request.form['username']
+            session['logged_in'] = True
             return redirect('/admin')
         else:
             flash(f'Your credentials did not match. Please try again', 'danger')
@@ -172,10 +171,12 @@ def login():
     # For normal user
     else:
         if form.validate_on_submit():
-            username = User.query.filter_by(username=form.username.data).first()
+            username = User.query.filter_by(
+                username=form.username.data).first()
             if username:
                 if bcrypt.check_password_hash(username.password, form.password.data):
-                    loggedInAs = username
+                    session['username'] = request.form['username']
+                    session['logged_in'] = True
                     login_user(username)
                     return redirect('/')
                 else:
@@ -190,7 +191,7 @@ def login():
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
     logout_user()
-    loggedInAs = None
+    session['logged_in'] = False
     return redirect(url_for('login'))
 
 # @app.route('/dashboard', methods=['GET', 'POST'])
@@ -207,7 +208,8 @@ def signup():
             flash(f'Username not allowed. Please any other username.', 'danger')
             return redirect(url_for('signup'))
         else:
-            hashed_password = bcrypt.generate_password_hash(form.password.data, 12)
+            hashed_password = bcrypt.generate_password_hash(
+                form.password.data, 12)
             new_user = User(username=form.username.data, password=hashed_password,
                             email=form.email.data, mobile=form.mobile.data)
             db.session.add(new_user)
