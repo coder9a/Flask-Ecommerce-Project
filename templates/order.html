@@ -1,66 +1,40 @@
-{% extends "heading.html" %} {% block content %}
+{% extends "heading.html" %}
+{% block content %}
 <link rel="icon" property="icon" href="https://cdn-icons-png.flaticon.com/512/282/282100.png" type="image/x-icon" />
 <link rel="stylesheet" property="stylesheet"
   href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" />
 <div class="container">
-  <h1 style="text-align:center;" class="my-2">nini</h1>
+  <h1 style="text-align:center;" class="my-2">{{ productDetails.name }}</h1>
   <div class="row">
-    <div class="col-lg-3 my-4">
-      <h2>shirt</h2>
-    </div>
-
-    <div class="col-lg-9">
-      <div class="row">
-        <div class="col-lg-6">
-          <div class="card mt-4">
-            <img class="card-img-top img-fluid"
-              src="https://rukminim1.flixcart.com/image/416/416/kjhgzgw0-0/book/m/m/u/alchemist-original-imafzfhzefg8etxh.jpeg?q=70"
-              alt="" style="
-                width: 300px;
-                height: 390px;
-                margin-left: auto;
-                margin-right: auto;
-              " />
-          </div>
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card mt-4">
+          <div id="itemImage"></div>
+          <img class="card-img-top img-fluid"
+            src="https://rukminim1.flixcart.com/image/416/416/kjhgzgw0-0/book/m/m/u/alchemist-original-imafzfhzefg8etxh.jpeg?q=70"
+            alt="" style="
+              width: 300px;
+              height: 390px;
+              margin-left: auto;
+              margin-right: auto;
+            " />
         </div>
-
-        <div class="col-lg-6">
-          <div class="card card-outline-secondary my-4">
-            <div class="card-header">Order Details</div>
-
-            <div class="card-body">
-              <form>
-                <div class="form-group">
-                  <dt><label for="name"></label></dt>
-                  <input class="form-control" id="name" name="name" placeholder="Full Name" type="text" />
-                </div>
-
-                <div class="form-group">
-                  <dt><label for="mobile_num"></label></dt>
-                  <input class="form-control" id="mobile_num" name="mobile_num" placeholder="Mobile" type="text" />
-                </div>
-
-                <div class="form-group">
-                  <dt><label for="quantity"></label></dt>
-                  <select class="form-control" id="quantity" name="quantity">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <dt><label for="order_place"></label></dt>
-                  <input class="form-control" id="order_place" name="order_place" placeholder="Order Place" required=""
-                    type="text" value="" />
-                </div>
-                <a href="{{ url_for('orderStatus')}}"><button type="button" class="btn btn-primary">
-                    Confirm Order
-                  </button></a>
-              </form>
-            </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card card-outline-secondary my-4">
+          <div class="card-header">
+            <h2>Book Details</h2>
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">Author</h4>
+            <p class="card-text">{{ productDetails.name }}</p>
+            <h4 class="card-title">Description</h4>
+            <p class="card-text">{{ productDetails.description }}</p>
+            <h4 class="card-title">Price</h4>
+            <p class="card-text"><strong>{{ productDetails.price }}</strong></p>
+            <a href="{{ url_for('orderStatus')}}"><button type="button" class="btn btn-primary">
+                Buy Now
+              </button></a>
           </div>
         </div>
       </div>
