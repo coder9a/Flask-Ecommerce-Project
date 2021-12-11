@@ -9,7 +9,6 @@ from wtforms.validators import InputRequired, Length, ValidationError, EqualTo
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bcrypt import Bcrypt
 from datetime import datetime
-import base64
 
 SECRET_KEY = os.urandom(32)
 app = Flask(__name__)
@@ -47,7 +46,7 @@ class ProductsInfo(db.Model, UserMixin):
 
 
 # -----------------------------> Table to store the details of all the products brought
-class ProductBrought(db.Model):
+class ProductBrought(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     productid = db.Column(db.Integer, db.ForeignKey(
@@ -134,9 +133,11 @@ def adminHome():
             products = ProductsInfo.query.order_by(ProductsInfo.name).all()
             return render_template('Admin/adminPanel.html', products=products)
     else:
-        return render_template('Error.html', title = 'Access Denied', msg = "Unable to access admin Homepage, Please signin to continue.")
+        return render_template('Error.html', title='Access Denied', msg="Unable to access admin Homepage, Please signin to continue.")
 
 # -----------------------> For admin to delete a product
+
+
 @app.route('/delete/<int:id>')
 def deleteProduct(id):
     if 'username' in session and session['username'] == 'admin':
@@ -149,7 +150,7 @@ def deleteProduct(id):
         except:
             return "Some error occured while deleting the file"
     else:
-        return render_template('Error.html', title = "Access Denied!", msg = "You need admin priviledges to perform this action!")
+        return render_template('Error.html', title="Access Denied!", msg="You need admin priviledges to perform this action!")
 
 
 # -------------------------> For Homepage
@@ -240,7 +241,7 @@ def signup():
 
 @app.route('/order/<int:productid>')
 def order(productid):
-    if 'username' in session and session['username']!='None':
+    if 'username' in session and session['username'] != 'None':
         try:
             productDetails = ProductsInfo.query.get_or_404(productid)
             return render_template('order.html', productDetails=productDetails)
@@ -251,17 +252,20 @@ def order(productid):
         flash(f'To buy, you need to be signed up!', 'danger')
         return redirect('/login')
 
+
 def register_order():
     if 'username' in session and session['username'] != 'None':
-        newOrder = ProductsInfo(
-            userid = User.query.filter_by(username=session['username']).first().id,
-            productid = session['productid']
-        )
+
+        newOrder = ProductBrought(userid=User.query.filter_by(username=session['username']).first().id, 
+        productid=session['productid'])
+        print(newOrder)
         try:
             db.session.add(newOrder)
             db.session.commit()
         except:
             return "There was an issue pushing to database"
+    return render_template('order.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
