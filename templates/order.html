@@ -10,9 +10,7 @@
       <div class="col-lg-6">
         <div class="card mt-4">
           <div id="itemImage"></div>
-          <img class="card-img-top img-fluid"
-            src="https://rukminim1.flixcart.com/image/416/416/kjhgzgw0-0/book/m/m/u/alchemist-original-imafzfhzefg8etxh.jpeg?q=70"
-            alt="" style="
+          <img class="card-img-top img-fluid" src={{ productDetails.thumbnailLink }} alt="" style="
               width: 300px;
               height: 390px;
               margin-left: auto;
@@ -32,7 +30,8 @@
             <p class="card-text">{{ productDetails.description }}</p>
             <h4 class="card-title">Price</h4>
             <p class="card-text"><strong>{{ productDetails.price }}</strong></p>
-            <a href="{{ url_for('orderStatus')}}"><button type="button" class="btn btn-primary">
+            <a href="" download><button id='buy-button' onClick="myFunction()" type="button"
+                class="btn btn-primary">
                 Buy Now
               </button></a>
           </div>
@@ -41,4 +40,15 @@
     </div>
   </div>
 </div>
+<script>
+  var counter = 0;
+  function myFunction() {
+    if (counter == 0){
+      document.getElementById("buy-button").innerHTML = "Download Now";
+    document.getElementById("buy-button").className = "btn btn-success"; 
+    counter+=1
+    }
+       
+  }
+</script>
 {% endblock %}

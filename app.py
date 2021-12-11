@@ -230,18 +230,5 @@ def order(productid):
         return redirect('/')
 
 
-# @app.route('/orderStatus/<int:userid>')
-# def orderStatus(userid):
-#     try:
-#         orderDetails = ProductsInfo.query.get_or_404(userid)
-#         return render_template('orderStatus.html', orderDetails=orderDetails)
-#     except:
-#         #!!! Product not found Warning must show up
-#         return redirect('/')
-
-@app.route('/orderStatus')
-def orderStatus():
-    return render_template('orderStatus.html')
-
 if __name__ == '__main__':
     app.run(debug=True)
