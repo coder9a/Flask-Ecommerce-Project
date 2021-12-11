@@ -2,9 +2,9 @@ import os
 from flask import Flask, url_for, redirect, request, flash, session
 from flask.templating import render_template
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, login_manager, login_user, login_required, LoginManager, current_user, logout_user, mixins
+from flask_login import UserMixin, login_manager, login_user, login_required, LoginManager, current_user, logout_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, IntegerField
+from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError, EqualTo
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bcrypt import Bcrypt
@@ -25,6 +25,8 @@ login_manager.login_view = "login"
 
 @login_manager.user_loader
 def load_user(user_id):
+
+
     return User.query.get(int(user_id))
 
 # ----------------------------------------------------------------------------------
@@ -153,6 +155,35 @@ def deleteProduct(id):
         return render_template('Error.html', title="Access Denied!", msg="You need admin priviledges to perform this action!")
 
 
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+def updateProduct(id):
+    if 'username' in session and session['username'] == 'admin':
+        if request.method == 'POST':
+            print(id)
+            name=request.form['productName'],
+            author=request.form['productAuthor'],
+            description=request.form['productDescription'],
+            price=request.form['productPrice'],
+            link=request.form['productLink'],
+            thumbnailLink=request.form['thumbnailLink']
+
+            if id == 0:
+                product = ProductsInfo(name = name, author = author, description = description, price = price, link = link, thumbnailLink = thumbnailLink)
+                db.session.add(product)
+                db.session.commit()
+            else:
+                product = ProductsInfo.query.filter_by(id=id).first()
+                product.name=name,
+                product.author=author,
+                product.description=description,
+                product.price=price,
+                product.link=link,
+                product.thumbnailLink=thumbnailLink
+                db.session.commit()
+        product = ProductsInfo.query.filter_by(id=id).first()
+        return render_template('Admin/update.html', product=product, id=id)
+   
+
 # -------------------------> For Homepage
 
 
@@ -224,7 +255,7 @@ def logout():
 def signup():
     form = RegsiterForm()
     if form.validate_on_submit():
-        if (form.username.data).lower() == 'admin':
+        if (form.username.data).lower() == 'admin' and (form.username.data).lower() == 'none':
             flash(f'Username not allowed. Please any other username.', 'danger')
             return redirect(url_for('signup'))
         else:
