@@ -9,9 +9,13 @@ from wtforms.validators import InputRequired, Length, ValidationError, EqualTo
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bcrypt import Bcrypt
 from datetime import datetime
+from werkzeug.utils import secure_filename
 
+UPLOAD_FOLDER = 'static/images/'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 SECRET_KEY = os.urandom(32)
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -25,7 +29,6 @@ login_manager.login_view = "login"
 
 @login_manager.user_loader
 def load_user(user_id):
-
 
     return User.query.get(int(user_id))
 
@@ -41,19 +44,20 @@ class ProductsInfo(db.Model, UserMixin):
     price = db.Column(db.Integer)
     link = db.Column(db.String(200), nullable=False)
     dateaddes = db.Column(db.DateTime, default=datetime.utcnow)
-    thumbnailLink = db.Column(db.Text, nullable=True)
+    imageName = db.Column(db.Text, nullable=True)
 
     def __repr__(self):
         return f'<Task : {self.id}>'
 
 
 # -----------------------------> Table to store the details of all the products brought
-class ProductBrought(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    userid = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    productid = db.Column(db.Integer, db.ForeignKey(
-        'products_info.id'), nullable=False)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+# class ProductBrought(db.Model, UserMixin):
+#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     userid = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#     productid = db.Column(db.Integer, db.ForeignKey(
+#         'products_info.id'), nullable=False)
+#     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 # ---------------------------------------------------------------------------------
@@ -77,8 +81,10 @@ class RegsiterForm(FlaskForm):
         min=4, max=40)], render_kw={"placeholder": "Mobile no."})
     password = PasswordField(validators=[InputRequired(), Length(
         min=4, max=20)], render_kw={"placeholder": "Password"})
-    password2 = PasswordField(validators=[InputRequired(), EqualTo(
-        'password')], render_kw={"placeholder": "Confirm Password"})
+    # password2 = PasswordField(validators=[InputRequired(), EqualTo(
+    #     'password')], render_kw={"placeholder": "Confirm Password"})
+    password2 = PasswordField(validators=[InputRequired(), ],
+                              render_kw={"placeholder": "Confirm Password"})
     submit = SubmitField("Register")
 
     def validate_user(self, username, email, mobile):
@@ -109,18 +115,27 @@ class LoginForm(FlaskForm):
 # ------------------------------> For admin to view the products and delete them
 
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 @app.route('/admin', methods=['GET', 'POST'])
 def adminHome():
     if 'username' in session and session['username'] == 'admin':
         # --------------> For admin to add new product
         if request.method == 'POST':
+            image = request.files['productImage']
+            if image and allowed_file(image.filename):
+                filename = secure_filename(image.filename)
+                image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
             newItem = ProductsInfo(
                 name=request.form['productName'],
                 author=request.form['productAuthor'],
                 description=request.form['productDescription'],
                 price=request.form['productPrice'],
                 link=request.form['productLink'],
-                thumbnailLink=request.form['thumbnailLink']
+                imageName=image.filename
             )
             try:
                 session['productName'] = request.form['productName']
@@ -155,34 +170,48 @@ def deleteProduct(id):
         return render_template('Error.html', title="Access Denied!", msg="You need admin priviledges to perform this action!")
 
 
-@app.route('/update/<int:id>', methods=['GET', 'POST'])
+# ---------------------------> Function to autofill the details into the update form
+@app.route('/update/<int:id>', methods=['GET'])
 def updateProduct(id):
-    if 'username' in session and session['username'] == 'admin':
-        if request.method == 'POST':
+    if request.method == 'GET':
+        if 'username' in session and session['username'] == 'admin':
             print(id)
-            name=request.form['productName'],
-            author=request.form['productAuthor'],
-            description=request.form['productDescription'],
-            price=request.form['productPrice'],
-            link=request.form['productLink'],
-            thumbnailLink=request.form['thumbnailLink']
+            toUpdate = ProductsInfo.query.get_or_404(id)
+            return render_template('Admin/update.html', toUpdate=toUpdate, product_id=id)
+        else:
+            return render_template('Error.html', title="Access Denied!", msg="You need admin priviledges to perform this action!")
 
-            if id == 0:
-                product = ProductsInfo(name = name, author = author, description = description, price = price, link = link, thumbnailLink = thumbnailLink)
-                db.session.add(product)
-                db.session.commit()
-            else:
-                product = ProductsInfo.query.filter_by(id=id).first()
-                product.name=name,
-                product.author=author,
-                product.description=description,
-                product.price=price,
-                product.link=link,
-                product.thumbnailLink=thumbnailLink
-                db.session.commit()
-        product = ProductsInfo.query.filter_by(id=id).first()
-        return render_template('Admin/update.html', product=product, id=id)
-   
+# --------------------------> For admin to update the product details
+
+
+@app.route('/updateproduct', methods=['POST'])
+def UpdateProducts():
+    if 'username' in session and session['username'] == 'admin':
+
+        name = request.form['productName']
+        author = request.form['productAuthor']
+        description = request.form['productDescription']
+        price = request.form['productPrice']
+        link = request.form['productLink']
+
+        image = request.files['productImage']
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            image = image.filename
+            db.session.query(ProductsInfo).filter(ProductsInfo.id == request.form['product_id']).update(
+                {'name': name, 'author': author, 'description': description, 'price': price, 'link': link, 'imageName': image})
+            db.session.commit()
+
+        else:
+            db.session.query(ProductsInfo).filter(ProductsInfo.id == request.form['product_id']).update(
+                {'name': name, 'author': author, 'description': description, 'price': price, 'link': link})
+            db.session.commit()
+        return redirect('/admin')
+    else:
+        return render_template('Error.html', title="Access Denied!", msg="You need admin priviledges to perform this action!")
+
 
 # -------------------------> For Homepage
 
@@ -255,18 +284,27 @@ def logout():
 def signup():
     form = RegsiterForm()
     if form.validate_on_submit():
-        if (form.username.data).lower() == 'admin' and (form.username.data).lower() == 'none':
+        if (form.username.data).lower() == 'admin' or (form.username.data).lower() == 'none':
             flash(f'Username not allowed. Please any other username.', 'danger')
             return redirect(url_for('signup'))
+        elif (form.password.data != form.password2.data):
+            flash(f'Password mismatch.', 'danger')
+
         else:
-            hashed_password = bcrypt.generate_password_hash(
-                form.password.data, 12)
-            new_user = User(username=form.username.data, password=hashed_password,
-                            email=form.email.data, mobile=form.mobile.data)
-            db.session.add(new_user)
-            db.session.commit()
-            flash(f'You have signed up successfully. Please login now.', 'success')
-            return redirect(url_for('login'))
+            try:
+                hashed_password = bcrypt.generate_password_hash(
+                    form.password.data, 12)
+                new_user = User(username=form.username.data, password=hashed_password,
+                                email=form.email.data, mobile=form.mobile.data)
+                db.session.add(new_user)
+                db.session.commit()
+                flash(f'You have signed up successfully. Please login now.', 'success')
+                return redirect(url_for('login'))
+            except:
+                # return render_template('Error.html', title="Integrity Voilation")
+                flash(f'User with same details already exists.', 'danger')
+                return redirect(url_for('signup'))
+
     return render_template('register.html', form=form)
 
 
@@ -275,6 +313,7 @@ def order(productid):
     if 'username' in session and session['username'] != 'None':
         try:
             productDetails = ProductsInfo.query.get_or_404(productid)
+            print(productDetails.imageName)
             return render_template('order.html', productDetails=productDetails)
         except:
             #!!! Product not found Warning must show up
@@ -287,8 +326,8 @@ def order(productid):
 def register_order():
     if 'username' in session and session['username'] != 'None':
 
-        newOrder = ProductBrought(userid=User.query.filter_by(username=session['username']).first().id, 
-        productid=session['productid'])
+        newOrder = ProductBrought(userid=User.query.filter_by(username=session['username']).first().id,
+                                  productid=session['productid'])
         print(newOrder)
         try:
             db.session.add(newOrder)
