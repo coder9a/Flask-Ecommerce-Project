@@ -4,12 +4,13 @@ from flask.templating import render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_manager, login_user, login_required, LoginManager, current_user, logout_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import InputRequired, Length, ValidationError, EqualTo
+from wtforms import StringField, PasswordField, SubmitField, EmailField
+from wtforms.validators import InputRequired, Length, ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bcrypt import Bcrypt
 from datetime import datetime
 from werkzeug.utils import secure_filename
+
 
 UPLOAD_FOLDER = 'static/images/'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -75,14 +76,12 @@ class User(db.Model, UserMixin):
 class RegsiterForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(
         min=4, max=20)], render_kw={"placeholder": "Username"})
-    email = StringField(validators=[InputRequired(), Length(
+    email = EmailField(validators=[InputRequired(), Length(
         min=4, max=40)], render_kw={"placeholder": "Email"})
     mobile = StringField(validators=[InputRequired(), Length(
-        min=4, max=40)], render_kw={"placeholder": "Mobile no."})
+        min=10, max=15)], render_kw={"placeholder": "Mobile no."})
     password = PasswordField(validators=[InputRequired(), Length(
         min=4, max=20)], render_kw={"placeholder": "Password"})
-    # password2 = PasswordField(validators=[InputRequired(), EqualTo(
-    #     'password')], render_kw={"placeholder": "Confirm Password"})
     password2 = PasswordField(validators=[InputRequired(), ],
                               render_kw={"placeholder": "Confirm Password"})
     submit = SubmitField("Register")
@@ -97,12 +96,12 @@ class RegsiterForm(FlaskForm):
         existing_user_email = User.query.filter_by(email=email.data).first()
         if existing_user_email:
             raise ValidationError(
-                'User already exists. Please choose a different username.')
+                'User already exists. Please choose a different email.')
 
         existing_user_mobile = User.query.filter_by(mobile=mobile.data).first()
         if existing_user_mobile:
             raise ValidationError(
-                'User already exists. Please choose a different username.')
+                'User already exists. Please choose a different mobile number.')
 
 
 class LoginForm(FlaskForm):
