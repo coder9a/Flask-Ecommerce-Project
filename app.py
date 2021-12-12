@@ -177,6 +177,7 @@ def updateProduct(id):
         if 'username' in session and session['username'] == 'admin':
             print(id)
             toUpdate = ProductsInfo.query.get_or_404(id)
+            print(toUpdate.description)
             return render_template('Admin/update.html', toUpdate=toUpdate, product_id=id)
         else:
             return render_template('Error.html', title="Access Denied!", msg="You need admin priviledges to perform this action!")
@@ -193,7 +194,6 @@ def UpdateProducts():
         description = request.form['productDescription']
         price = request.form['productPrice']
         link = request.form['productLink']
-
         image = request.files['productImage']
         if image and allowed_file(image.filename):
             filename = secure_filename(image.filename)
@@ -323,18 +323,18 @@ def order(productid):
         return redirect('/login')
 
 
-def register_order():
-    if 'username' in session and session['username'] != 'None':
+# def register_order():
+#     if 'username' in session and session['username'] != 'None':
 
-        newOrder = ProductBrought(userid=User.query.filter_by(username=session['username']).first().id,
-                                  productid=session['productid'])
-        print(newOrder)
-        try:
-            db.session.add(newOrder)
-            db.session.commit()
-        except:
-            return "There was an issue pushing to database"
-    return render_template('order.html')
+#         newOrder = ProductBrought(userid=User.query.filter_by(username=session['username']).first().id,
+#                                   productid=session['productid'])
+#         print(newOrder)
+#         try:
+#             db.session.add(newOrder)
+#             db.session.commit()
+#         except:
+#             return "There was an issue pushing to database"
+#     return render_template('order.html')
 
 
 if __name__ == '__main__':

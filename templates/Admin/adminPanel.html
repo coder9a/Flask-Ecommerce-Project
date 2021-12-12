@@ -7,16 +7,15 @@
 
 <div class="jumbotron jumbotron-fluid">
     <div class="container">
-        <h1 style="text-align:center;" onclick="takeHome();" class="display-4">Hey! Admin</h1>
+        <h1 style="text-align:center; margin:50px;" onclick="takeHome();" class="display-4">Hey! Admin</h1>
     </div>
 </div>
 <div class="container">
-    <div style="text-align:center;" class="mb-4" id="buttons">
-        <h3>Select your action</h3>
-        <button type="button" class="btn btn-primary btn-lg btn-block addButton" onclick="triggerAdd()">Add an
+    <div style="text-align:center; " class="mb-4" id="buttons">
+        <h3 style="margin:30px;">Select your action</h3>
+        <button type="button" style="margin:50px;" class="btn btn-primary btn-lg btn-block addButton" onclick="triggerAdd()">Add an
             Item</button>
-        <button type="button" class="btn btn-danger btn-lg btn-block removeButton" onclick="triggerRemove()">Remove an
-            Item</button>
+        <button type="button"  style="margin:50px;" class="btn btn-danger btn-lg btn-block removeButton" onclick="triggerRemove()">Remove/Update Item</button>
     </div>
 </div>
 
@@ -27,27 +26,27 @@
         
             <div class="mb-3">
                 <label for="productName" class="form-label">Product Name: </label>
-            <input type="text" class="form-control" name="productName" id="productName" />
+            <input type="text" class="form-control" name="productName" id="productName" required/>
             </div>
     
             <div class="mb-3">
                 <label for="productAuthor" class="form-label">Product Author: </label>
-            <input type="text" class="form-control" name="productAuthor" id="productAuthor" />
+            <input type="text" class="form-control" name="productAuthor" id="productAuthor" required/>
             </div>
             <div class="mb-3">
                 <label for="productDescription" class="form-label">Product Description: </label>
-                <input type="text" class="form-control" name="productDescription" id="productDescription" />
+                <input type="text" class="form-control" name="productDescription" id="productDescription" required/>
             </div>
             <div class="mb-3">
                 <label for="productPrice" class="form-label">Product Price: </label>
-                <input type="text" class="form-control" name="productPrice" id="productPrice" />
+                <input type="text" class="form-control" name="productPrice" id="productPrice" required/>
             </div>
             <div class="mb-3">
                 <label for="productLink" class="form-label">Product Download Link: </label>
-                <input type="text" class="form-control" name="productLink" id="productLink" />
+                <input type="text" class="form-control" name="productLink" id="productLink" required/>
             </div>
             <div class="mb-3">
-                <input type="file" class="form-control" name="productImage" id="productImage" /><br /><br />
+                <input type="file" class="form-control" name="productImage" id="productImage" required/><br /><br />
             </div>
             <div class="mb-3">
                 <input class="btn btn-primary" type="submit" value="Add to database" name="imageName" />
