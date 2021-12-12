@@ -19,6 +19,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -34,9 +35,8 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # ----------------------------------------------------------------------------------
+
 # --------------------------------> Table to store products
-
-
 class ProductsInfo(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
@@ -51,17 +51,6 @@ class ProductsInfo(db.Model, UserMixin):
         return f'<Task : {self.id}>'
 
 
-# -----------------------------> Table to store the details of all the products brought
-
-# class ProductBrought(db.Model, UserMixin):
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     userid = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-#     productid = db.Column(db.Integer, db.ForeignKey(
-#         'products_info.id'), nullable=False)
-#     date = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-# ---------------------------------------------------------------------------------
 # -----------------------> Table containing details of users
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -70,9 +59,9 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(20), nullable=False, unique=True)
     mobile = db.Column(db.String(20), nullable=False, unique=True)
 
-# -------------------------> User Form
 
 
+# -------------------------> User Registration Form
 class RegsiterForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(
         min=4, max=20)], render_kw={"placeholder": "Username"})
@@ -104,6 +93,7 @@ class RegsiterForm(FlaskForm):
                 'User already exists. Please choose a different mobile number.')
 
 
+# -------------------------------> User Login Form
 class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(
         min=4, max=20)], render_kw={"placeholder": "Username"})
@@ -111,13 +101,13 @@ class LoginForm(FlaskForm):
         min=4, max=20)], render_kw={"placeholder": "Password"})
     submit = SubmitField("Login")
 
+
 # ------------------------------> For admin to view the products and delete them
-
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+# --------------------------------> Admin Homepage
 @app.route('/admin', methods=['GET', 'POST'])
 def adminHome():
     if 'username' in session and session['username'] == 'admin':
@@ -151,9 +141,9 @@ def adminHome():
     else:
         return render_template('Error.html', title='Access Denied', msg="Unable to access admin Homepage, Please signin to continue.")
 
+
+
 # -----------------------> For admin to delete a product
-
-
 @app.route('/delete/<int:id>')
 def deleteProduct(id):
     if 'username' in session and session['username'] == 'admin':
@@ -181,9 +171,9 @@ def updateProduct(id):
         else:
             return render_template('Error.html', title="Access Denied!", msg="You need admin priviledges to perform this action!")
 
+
+
 # --------------------------> For admin to update the product details
-
-
 @app.route('/updateproduct', methods=['POST'])
 def UpdateProducts():
     if 'username' in session and session['username'] == 'admin':
@@ -212,9 +202,7 @@ def UpdateProducts():
         return render_template('Error.html', title="Access Denied!", msg="You need admin priviledges to perform this action!")
 
 
-# -------------------------> For Homepage
-
-
+# -------------------------> User Homepage
 @app.route('/')
 def home():
     allProducts = []
@@ -225,7 +213,6 @@ def home():
 
     try:
         allProducts = ProductsInfo.query.all()
-        print("======-=-=-=-==-=======>", allProducts)
     except:
         pass
     return render_template('home.html', allProducts=allProducts)
@@ -234,7 +221,6 @@ def home():
 # -----------------------------> For logging in admin and normal users
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
     # Adding a username in session with value if doesn't exists any.
     if 'username' not in session:
         session['username'] = 'None'
@@ -271,6 +257,7 @@ def login():
         return render_template('login.html', form=form)
 
 
+# ---------------------------------> For Logging Out Users
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
     logout_user()
@@ -278,7 +265,7 @@ def logout():
     session['logged_in'] = False
     return redirect(url_for('login'))
 
-
+# -----------------------------------> For signing up a user
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = RegsiterForm()
@@ -307,6 +294,7 @@ def signup():
     return render_template('register.html', form=form)
 
 
+# ----------------------------------------> Buying a book
 @app.route('/order/<int:productid>')
 def order(productid):
     if 'username' in session and session['username'] != 'None':
@@ -320,20 +308,6 @@ def order(productid):
     else:
         flash(f'To buy, you need to be signed up!', 'danger')
         return redirect('/login')
-
-
-# def register_order():
-#     if 'username' in session and session['username'] != 'None':
-
-#         newOrder = ProductBrought(userid=User.query.filter_by(username=session['username']).first().id,
-#                                   productid=session['productid'])
-#         print(newOrder)
-#         try:
-#             db.session.add(newOrder)
-#             db.session.commit()
-#         except:
-#             return "There was an issue pushing to database"
-#     return render_template('order.html')
 
 
 if __name__ == '__main__':
