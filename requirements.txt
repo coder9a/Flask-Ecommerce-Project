@@ -121,4 +121,4 @@ Werkzeug==2.0.2
 WTForms==3.0.0
 WTForms-Components==0.10.5
 zipp==1.0.0
-PyGObject==3.26.1
+PyGObject
