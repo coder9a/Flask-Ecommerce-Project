@@ -112,7 +112,6 @@ systemd-python==234
 toml==0.10.2
 tornado==6.1
 traitlets==5.1.0
-ufw==0.36
 urllib3==1.25.8
 usb-creator==0.3.7
 validators==0.18.2
