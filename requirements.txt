@@ -9,7 +9,6 @@ bidict==0.21.4
 blinker==1.4
 certifi==2019.11.28
 chardet==3.0.4
-chrome-gnome-shell==0.0.0
 click==8.0.3
 colorama==0.4.3
 command-not-found==0.3
