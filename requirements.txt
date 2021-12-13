@@ -92,9 +92,7 @@ pyOpenSSL==19.0.0
 pyparsing==3.0.6
 pyRFC3339==1.1
 pytest==6.2.5
-python-apt==2.0.0+ubuntu0.20.4.6
 python-dateutil==2.7.3
-python-debian===0.1.36ubuntu1
 python-engineio==4.3.0
 python-socketio==5.5.0
 pytz==2019.3
