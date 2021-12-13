@@ -16,8 +16,6 @@ cryptography==2.8
 dbus-python==1.2.16
 debugpy==1.5.1
 decorator==5.1.0
-defer==1.0.6
-dell-recovery==0.0.0
 distlib==0.3.0
 distro==1.4.0
 distro-info===0.23ubuntu1
@@ -122,7 +120,6 @@ toml==0.10.2
 tornado==6.1
 traitlets==5.1.0
 ubuntu-advantage-tools==27.4
-ubuntu-drivers-common==0.0.0
 ufw==0.36
 unattended-upgrades==0.1
 urllib3==1.25.8
